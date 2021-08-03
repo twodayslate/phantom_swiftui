@@ -128,11 +128,7 @@ struct ContentView: View {
                     ForEach(0..<2) { _ in
                         HStack(alignment: .center) {
                             
-                            GeometryReader { proxy in
-                                VStack {
-                                Image(systemName: "bitcoinsign.circle.fill").resizable().aspectRatio(contentMode: .fit).frame(width: proxy.size.height)
-                                }
-                            }
+                            Image(systemName: "bitcoinsign.circle.fill").imageScale(.large)
                             
                             VStack(alignment: .leading) {
                                 Text("Solana").font(.headline)
