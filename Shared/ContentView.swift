@@ -20,89 +20,86 @@ struct ContentView: View {
     @State var scrollOffset: CGFloat = 0
     @State var headerSize: CGSize = .zero
     @State var priceSize: CGSize = .zero
+    @State var topSafeArea: CGFloat = 0
     
     var body: some View {
-            ZStack {
-                ScrollView {
-                    Color.clear.frame(height:0).overlay(GeometryReader { proxy -> Color in
-                        let minY = proxy.frame(in: .global).minY
-                        //print("header", proxy.frame(in: .global), proxy.frame(in: .local))
-                        print(minY, self.headerPercentage)
-                        DispatchQueue.main.async {
-                            //withAnimation {
-                                self.scrollOffset = minY
+        ZStack(alignment: .top){
+            GeometryReader { proxy -> Color in
+                print("safe area", proxy.safeAreaInsets)
+                DispatchQueue.main.async {
+                    
+                    topSafeArea = proxy.safeAreaInsets.top
+                    
+                }
+                return .clear
+            }
+            ScrollView {
+                // Fake Navigation Header
+                VStack(spacing: 0) {
+                    VStack(alignment: .leading) {
+                        ZStack {
+                            HStack(alignment: .center) {
+                                //GeometryReader { proxy in
+                                Spacer()
+                                
+                                Text("Wallet 1").font(.headline).bold().foregroundColor(.accentColor).padding(.horizontal).background(GeometryReader { proxy -> Color in
+                                    
+                                    DispatchQueue.main.async {
+                                        withAnimation {
+                                            headerSize = proxy.size
+                                        }
+                                    }
+                                    
+                                    return .clear
+                                })
+                                .offset(x: self.scrollOffset >= 0 ? 0 : -(UIScreen.main.bounds.midX - self.headerSize.width/2) * self.headerPercentage)
+                                .offset(y: headerSize.height/3 * self.headerPercentage)
+                                
+                                Spacer()
+                            }
+                            HStack(alignment: .center) {
+                                //GeometryReader { proxy in
+                                
+                                Spacer()
+                                    
+                                Text("$17,382.82").transition(AnyTransition.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .trailing))).padding(.horizontal)
+                                    .offset(x: self.scrollOffset >= 0 ? 100 : 100 * (1.0-self.headerPercentage))
+                                    .offset(y: headerSize.height/3 * self.headerPercentage)
+                                
+                                
+                            }
+                        }
+                        
+                        
+                        HStack(alignment: .center) {
+                            Spacer()
+                            //if self.scrollOffset >= 0 {
+                            Text("1fRFgFkx7-Y9EKu7W9efmLalK_XFXqV10s5wTlZIp60").foregroundColor(.gray).font(.caption2)
+                                .padding(.bottom, 4.0)
+                                .transition(AnyTransition.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .bottom)).combined(with: .opacity))
+                                .opacity(self.scrollOffset >= 0 ? 1.0 : 1.0-Double(self.headerPercentage))
                             //}
+                            Spacer()
                         }
-                        return Color.clear
-                    }.frame(height: 0))
-//                    GeometryReader { proxy -> Color in
-//                        let minY = proxy.frame(in: .global).minY
-//                        print(minY)
-//                        DispatchQueue.main.async {
-//                            withAnimation {
-//                                self.scrollOffset = minY
-//                            }
-//                        }
-//                        return  Color.clear
-//                    }.frame(height: 0)
-                        VStack(spacing: 0) {
-                            GeometryReader { proxy in
-                                Color.clear.padding(.top, proxy.safeAreaInsets.top)
-                            }.padding(.top)
-                            VStack(alignment: .leading) {
-                                ZStack {
-                                    HStack(alignment: .center) {
-                                        //GeometryReader { proxy in
-                                        Spacer()
-                                        
-                                        Text("Wallet 1").font(.headline).bold().foregroundColor(.accentColor).padding(.horizontal).background(GeometryReader { proxy -> Color in
-                                            
-                                            DispatchQueue.main.async {
-                                                withAnimation {
-                                                    headerSize = proxy.size
-                                                }
-                                            }
-                                            
-                                            return .clear
-                                        })
-                                        .offset(x: self.scrollOffset >= 0 ? 0 : -(UIScreen.main.bounds.midX - self.headerSize.width/2) * self.headerPercentage)
-                                        .offset(y: headerSize.height/3 * self.headerPercentage)
-                                        
-                                        Spacer()
-                                    }
-                                    HStack(alignment: .center) {
-                                        //GeometryReader { proxy in
-                                        
-                                        Spacer()
-                                            
-                                        Text("$17,382.82").transition(AnyTransition.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .trailing))).padding(.horizontal)
-                                            .offset(x: self.scrollOffset >= 0 ? 100 : 100 * (1.0-self.headerPercentage))
-                                            .offset(y: headerSize.height/3 * self.headerPercentage)
-                                        
-                                        
-                                    }
-                                }
-                                
-                                
-                                HStack(alignment: .center) {
-                                    Spacer()
-                                    //if self.scrollOffset >= 0 {
-                                    Text("1fRFgFkx7-Y9EKu7W9efmLalK_XFXqV10s5wTlZIp60").foregroundColor(.gray).font(.caption2)
-                                        .padding(.bottom, 4.0)
-                                        .transition(AnyTransition.asymmetric(insertion: .move(edge: .bottom), removal: .move(edge: .bottom)).combined(with: .opacity))
-                                        .opacity(self.scrollOffset >= 0 ? 1.0 : 1.0-Double(self.headerPercentage))
-                                    //}
-                                    Spacer()
-                                }
-                                
-                            }.padding(.top, 100)
-                                //.padding(.top, proxy.safeAreaInsets.top).padding(.top).frame(height: nil)
-//                            }}
-                        Divider()
-                        }
-                        .background(Color(UIColor.secondarySystemBackground))
-                        .offset(y:-self.scrollOffset - 100)
-                    .zIndex(1.0)
+                        
+                    }.padding(.top, topSafeArea)
+
+                    Divider()
+                }
+                .background(Color(UIColor.secondarySystemBackground))
+                .offset(y:-self.scrollOffset)
+                .zIndex(1.0).background(GeometryReader { proxy -> Color in
+                    let minY = proxy.frame(in: .global).minY
+                    //print("header", proxy.frame(in: .global), proxy.frame(in: .local))
+                    print(minY, self.headerPercentage, proxy.safeAreaInsets.top)
+                    DispatchQueue.main.async {
+                        //withAnimation {
+                            self.scrollOffset = minY
+                        //}
+                    }
+                    
+                    return .clear
+                })
                     
                     VStack {
                         Text("$17,382.82").font(.largeTitle).bold()
@@ -123,9 +120,9 @@ struct ContentView: View {
                         
                         return .clear
                     })
-                    .opacity(self.scrollOffset >= 0 ? 1.0 : 1.0-Double(self.headerPercentage)).offset(y:-100).zIndex(0.0)
+                    .opacity(self.scrollOffset >= 0 ? 1.0 : 1.0-Double(self.headerPercentage)).zIndex(0.0)
                     
-                    ForEach(0..<2) { _ in
+                    ForEach(0..<10) { _ in
                         HStack(alignment: .center) {
                             
                             Image(systemName: "bitcoinsign.circle.fill").imageScale(.large)
@@ -141,32 +138,33 @@ struct ContentView: View {
                             }.font(.subheadline)
                         }.padding().background(Color(UIColor.secondarySystemFill)).cornerRadius(8.0).padding([.horizontal])
                         
-                    }.offset(y:-100)
-                }.ignoresSafeArea()
-                VStack {
-                    Spacer()
-                    HStack {
-                        Button(action: /*@START_MENU_TOKEN@*/{}/*@END_MENU_TOKEN@*/, label: {
-                            HStack {
-                                Spacer()
-                                Image(systemName: "tray.and.arrow.down")
-                                Text("Recieve").bold()
-                                Spacer()
-                            }
-                            
-                        }).padding(8.0).background(Color(UIColor.systemFill)).cornerRadius(8)
-                        Button(action: /*@START_MENU_TOKEN@*/{}/*@END_MENU_TOKEN@*/, label: {
-                            HStack {
-                                Spacer()
-                                Image(systemName: "paperplane")
-                                Text("Send").bold()
-                                Spacer()
-                            }
-                        }).padding(8.0).background(Color(UIColor.systemFill)).cornerRadius(8)
-                    }.padding()
+                    }
                 }
+                .ignoresSafeArea()
+            VStack {
+                Spacer()
+                HStack {
+                    Button(action: /*@START_MENU_TOKEN@*/{}/*@END_MENU_TOKEN@*/, label: {
+                        HStack {
+                            Spacer()
+                            Image(systemName: "tray.and.arrow.down")
+                            Text("Recieve").bold()
+                            Spacer()
+                        }
+                        
+                    }).padding(8.0).background(Color(UIColor.secondarySystemBackground)).cornerRadius(8).overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(UIColor.separator), lineWidth: 1.0))
+                    Button(action: /*@START_MENU_TOKEN@*/{}/*@END_MENU_TOKEN@*/, label: {
+                        HStack {
+                            Spacer()
+                            Image(systemName: "paperplane")
+                            Text("Send").bold()
+                            Spacer()
+                        }
+                    }).padding(8.0).background(Color(UIColor.secondarySystemBackground)).cornerRadius(8).overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(UIColor.separator), lineWidth: 1.0))
+                }.padding(.horizontal, 6.0).padding(.vertical)
             }
         }
+    }
     
     
     var headerPercentage: CGFloat {
